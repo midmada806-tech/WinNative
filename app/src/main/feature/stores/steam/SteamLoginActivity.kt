@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.winlator.cmod.R
-import com.winlator.cmod.shared.ui.layout.isPortraitLayout
 import com.winlator.cmod.feature.stores.steam.enums.LoginResult
 import com.winlator.cmod.feature.stores.steam.enums.LoginScreen
 import com.winlator.cmod.feature.stores.steam.ui.SteamLoginViewModel
@@ -55,13 +54,13 @@ import com.winlator.cmod.shared.ui.outlinedSwitchColors
 import timber.log.Timber
 
 // Palette (matches Settings > Stores)
-private val BgDark = Color(0xFF18181D)
+private val BgDark = Color(0xFF141414)
 private val CardDark = Color(0xFF1C1C2A)
 private val CardBorder = Color(0xFF2A2A3A)
 private val IconBoxBg = Color(0xFF242434)
-private val Accent = Color(0xFF1A9FFF)
-private val TextPrimary = Color(0xFFF0F4FF)
-private val TextSecondary = Color(0xFF7A8FA8)
+private val Accent = Color(0xFFFF7A00)
+private val TextPrimary = Color(0xFFF5F0EA)
+private val TextSecondary = Color(0xFFAD9782)
 private val DangerRed = Color(0xFFFF7A88)
 
 class SteamLoginActivity : FixedFontScaleComponentActivity() {
@@ -160,13 +159,17 @@ class SteamLoginActivity : FixedFontScaleComponentActivity() {
         passwordVisible: Boolean,
         onTogglePassword: () -> Unit,
     ) {
-        val portraitLogin = isPortraitLayout()
-
-        val backButton: @Composable (Modifier) -> Unit = { backModifier ->
+        Row(
+            modifier = Modifier.fillMaxSize().imePadding().padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Back arrow — top-left, matching homescreen settings icon position
             IconButton(
                 onClick = ::finish,
                 modifier =
-                    backModifier
+                    Modifier
+                        .align(Alignment.Top)
                         .statusBarsPadding()
                         .size(44.dp)
                         .clip(CircleShape)
@@ -179,11 +182,10 @@ class SteamLoginActivity : FixedFontScaleComponentActivity() {
                     modifier = Modifier.size(24.dp),
                 )
             }
-        }
 
-        val credentialsPane: @Composable (Modifier) -> Unit = { credModifier ->
+            // Left: credentials
             Column(
-                modifier = credModifier,
+                modifier = Modifier.weight(1.3f).fillMaxHeight().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -221,51 +223,23 @@ class SteamLoginActivity : FixedFontScaleComponentActivity() {
                 }
                 CredentialForm(state, viewModel, passwordVisible, onTogglePassword, compact = true)
             }
-        }
 
-        val qrPane: @Composable (Modifier) -> Unit = { qrModifier ->
+            // Thin divider
             Box(
-                modifier = qrModifier,
-                contentAlignment = Alignment.Center,
-            ) {
-                QrCard(state, viewModel, isLandscape = !portraitLogin)
-            }
-        }
-
-        if (portraitLogin) {
-            Column(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .imePadding()
-                        .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
-                        .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-            ) {
-                backButton(Modifier.align(Alignment.Start))
-                credentialsPane(Modifier.fillMaxWidth())
-                qrPane(Modifier.fillMaxWidth())
-            }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxSize().imePadding().padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                backButton(Modifier.align(Alignment.Top))
-                credentialsPane(Modifier.weight(1.3f).fillMaxHeight().verticalScroll(rememberScrollState()))
+                        .width(1.dp)
+                        .fillMaxHeight()
+                        .padding(vertical = 24.dp)
+                        .background(CardBorder),
+            )
 
-                Box(
-                    modifier =
-                        Modifier
-                            .width(1.dp)
-                            .fillMaxHeight()
-                            .padding(vertical = 24.dp)
-                            .background(CardBorder),
-                )
-
-                qrPane(Modifier.weight(0.9f).fillMaxHeight())
+            // Right: QR
+            Box(
+                modifier = Modifier.weight(0.9f).fillMaxHeight(),
+                contentAlignment = Alignment.Center,
+            ) {
+                QrCard(state, viewModel, isLandscape = true)
             }
         }
     }
